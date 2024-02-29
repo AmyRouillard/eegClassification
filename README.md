@@ -4,11 +4,14 @@ Classification of EEG data based on the Kaggle competition [HMS - Harmful Brain 
 
 ## Overview
 
+As part of
+
 ## Files
 
 |File|Description|
 |--|--|
 |`notebooks/`| |
+| `data_sample/`| Sample data from the competition|
 |`models/`| Folder containing the models|
 
 
