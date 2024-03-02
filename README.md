@@ -3,7 +3,7 @@ Classification of EEG data based on the Kaggle competition [HMS - Harmful Brain 
 ](https://www.kaggle.com/competitions/hms-harmful-brain-activity-classification/overview)
 
 
-![Image](files/eFig2.png){width=5}
+![Image](files/eFig2.png | width = 200)
 
 
 ## Overview
