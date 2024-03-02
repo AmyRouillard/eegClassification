@@ -24,7 +24,7 @@ The spectrograms are constructed from EEG data using [multitaper spectral estima
 
 The EEG data is collected using several electrodes and the four spectrograms are constructed from 4 different regions of the scalp as follows: Left lateral (Fp1, F7, T3, T5, O10); Right lateral (Fp2, F8, T4, T6, O2); Left Parasagittal (Fp1, F3, C3, P3, O1); Right Parasagittal (Fp2, F4, C4, P4, O2). 
 
-<img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eegmelb.gif" width="500">
+<img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eegmelb.gif" width="400">
 Fig: EEG electrode placements[2]
 
 ## Contents
