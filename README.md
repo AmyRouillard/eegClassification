@@ -4,13 +4,25 @@ Classification of EEG data based on the Kaggle competition [HMS - Harmful Brain 
 
 ## Overview
 
-There are six patterns of interest: seizure (SZ), generalized periodic discharges (GPD), lateralized periodic discharges (LPD), lateralized rhythmic delta activity (LRDA), generalized rhythmic delta activity (GRDA), or “other”.
+There are six brain activity patterns of interest: seizure (SZ), generalized periodic discharges (GPD), lateralized periodic discharges (LPD), lateralized rhythmic delta activity (LRDA), generalized rhythmic delta activity (GRDA), or “other”.
 
-The goal is to predict the probability of each of the six classes for each 50-second window of EEG data.
+The goal is to predict the probability of each of the six classes give 50-second window of EEG data and spectrogram data corresponding to 10 mins centered around the 50-second window.
 
 One of the challenges is that the number of experts voting on each window varies. 
 
+![Vote distribution](files/vote_dist.png)
+Fig: Distribution of the number of expert votes for the training, validation and test sets.
 
+## Data
+
+The data provided includes the raw EEG data and spectrograms. The EEG data records the electrical activity of the brain. The samples provided record a 50 second window, while the spectrograms cover a 10 minute window. 
+
+The spectrograms are constructed from EEG data using [multitaper spectral estimation](https://en.wikipedia.org/wiki/Multitaper)[1], and represent a visualization of the Fourier spectrum of the EEG signals over time. 
+
+The EEG data is collected using several electrodes and the four spectrograms are constructed from 4 different regions of the scalp as follows: Left lateral (Fp1, F7, T3, T5, O10); Right lateral (Fp2, F8, T4, T6, O2); Left Parasagittal (Fp1, F3, C3, P3, O1); Right Parasagittal (Fp2, F4, C4, P4, O2). 
+
+EEG electrodes[2]:
+![EEG electrodes](files/eegmelb.gif)
 
 ## Contents
 
@@ -49,3 +61,7 @@ One of the challenges is that the number of experts voting on each window varies
 	- Learning scheduler
 - Explainablitiy
 
+## Refereces
+
+[1] Zafar, S.F., Amorim, E., Williamsom, C.A., Jing, J., Gilmore, E.J., Haider, H.A., Swisher, C., Struck, A., Rosenthal, E.S., Ng, M. and Schmitt, S., 2020. A standardized nomenclature for spectrogram EEG patterns: inter-rater agreement and correspondence with common intensive care unit EEG patterns. Clinical Neurophysiology, 131(9), pp.2298-2306.
+[2] https://paulbourke.net/dataformats/eeg/
