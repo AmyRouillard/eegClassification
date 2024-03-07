@@ -36,13 +36,15 @@ Fig: EEG electrode placements[2]
 
 #### Target
 
-`class_label` - ['Other', 'LPD', 'Seizure', 'LRDA', 'GRDA', 'GPD'] - central 10 seconds
+`class_prob` - ['seizure', 'lpd', 'gpd', 'lrda', 'grda', 'other'] - central 10 seconds
 
 #### Input data
 
-`spec_*` - four arrays of shape (299, 100)
+`spec_*` - four arrays of shape (299, 100) - cropped from the raw spectrogram
 
-`eeg_*` - twenty arrays of shape (9800,)
+`eeg_*` - twenty arrays of shape (9800,) - cropped from the raw EEG data
+
+`eeg_*_spec` - twenty arrays of shape (129, 43) - spectrogram of the the cropped EEG data
 
 ## Contents
 
@@ -64,17 +66,24 @@ Fig: EEG electrode placements[2]
 
 ## Current tasks
 
+### Weeek 1:
 - Explorator data analysis
-	- labels distribution (expect consensus)
-	- EEG data format
+	- labels distribution (expect consensus)  :heavy_check_mark: 
+	- EEG data format  :heavy_check_mark:
 	- view spectrogram(s) (uniform size/missing data?)
-		- spectrogram stacking possibilities
-- Clarify goal (classify 50 second window or a whole EEG)  
+	- check test data if it has the same format as train data
+- Clarify goal (classify 50 second window or a whole EEG)  :heavy_check_mark: 
 - Understand Kullback-Leibler Divergence
-	- Compute the KL score for a given annotator (if possible) 
-- Create a Train/Validation/Test split with no data leakage (group by eeg_id) 
+- Compute the KL score for a given annotator (if possible) - unfortunately, the data is not available  :heavy_check_mark:
+- Create a Train/Validation/Test split with no data leakage (group by eeg_id)  :heavy_check_mark:
+- Create preprocessing pipeline
+- Apply preprocessing pipeline to add data
+	- check it works on Kaggle test sample for submission
+### Week 2:
 - Baseline model (random forest?)
 - Make a first submission to leader board  
+
+### Week 3:
 - Transfer learning (resnet50, imagenet, dino)  
 	- Data preparation
 	- Augmentation
