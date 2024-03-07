@@ -66,20 +66,23 @@ Fig: EEG electrode placements[2]
 
 ## Current tasks
 
-### Weeek 1:
+### Week 1:
 - Explorator data analysis
 	- labels distribution (expect consensus)  :heavy_check_mark: 
 	- EEG data format  :heavy_check_mark:
-	- view spectrogram(s) (uniform size/missing data?)
-	- check test data if it has the same format as train data
+	- view spectrogram(s) (uniform size/missing data?)  :heavy_check_mark: 
+	- check test data if it has the same format as train data :heavy_check_mark:
 - Clarify goal (classify 50 second window or a whole EEG)  :heavy_check_mark: 
-- Understand Kullback-Leibler Divergence
 - Compute the KL score for a given annotator (if possible) - unfortunately, the data is not available  :heavy_check_mark:
 - Create a Train/Validation/Test split with no data leakage (group by eeg_id)  :heavy_check_mark:
-- Create preprocessing pipeline
-- Apply preprocessing pipeline to add data
-	- check it works on Kaggle test sample for submission
+- Create preprocessing pipeline :heavy_check_mark:
+- check preprocessing pipeline works on Kaggle test sample for submission :heavy_check_mark:
+
 ### Week 2:
+- Is there any missing data (NaN etc?)
+- Rescaling? (e.g. min-max scaling, log scaling for spectrogram data)
+- Understand Kullback-Leibler Divergence
+- Apply preprocessing pipeline to all data
 - Baseline model (random forest?)
 - Make a first submission to leader board  
 
