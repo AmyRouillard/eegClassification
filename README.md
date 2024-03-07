@@ -17,6 +17,10 @@ One of the challenges is that the number of experts voting on each window varies
 <img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/vote_dist.png" width="750">
 Fig: Distribution of the number of expert votes for the training, validation and test sets.
 
+<img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/class_dist.png" width="750">
+Fig: Distribution of the class labels for the training, validation and test sets.
+
+
 ## Data
 
 The data provided includes the raw EEG data and spectrograms. The EEG data records the electrical activity of the brain. The samples provided record a 50 second window, while the spectrograms cover a 10 minute window. 
