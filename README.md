@@ -32,7 +32,7 @@ Fig: EEG electrode placements[2]
 
 #### Target
 
-`class_label` - ['Other', 'LPD', 'Seizure', 'LRDA', 'GRDA', 'GPD']
+`class_label` - ['Other', 'LPD', 'Seizure', 'LRDA', 'GRDA', 'GPD'] - central 10 seconds
 
 #### Input data
 
