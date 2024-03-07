@@ -4,6 +4,7 @@ Classification of EEG data based on the Kaggle competition [HMS - Harmful Brain 
 
 
 <img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eFig2.png" width="750">
+Fig: Example of the data as seen by the labeling expert.
 
 ## Overview
 
@@ -26,6 +27,18 @@ The EEG data is collected using several electrodes and the four spectrograms are
 
 <img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eegmelb.gif" width="400">
 Fig: EEG electrode placements[2]
+
+### Data format:
+
+#### Target
+
+`class_label` - ['Other', 'LPD', 'Seizure', 'LRDA', 'GRDA', 'GPD']
+
+#### Input data
+
+`spec_*` - four arrays of shape (299, 100)
+
+`eeg_*` - twenty arrays of shape (9800,)
 
 ## Contents
 
