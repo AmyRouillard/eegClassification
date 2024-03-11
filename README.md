@@ -3,48 +3,63 @@ Classification of EEG data based on the Kaggle competition [HMS - Harmful Brain 
 ](https://www.kaggle.com/competitions/hms-harmful-brain-activity-classification/overview)
 
 
-<img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eFig2.png" width="750">
-Fig: Example of the data as seen by the labeling expert.
+<img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eFig2.png" width="700">
+Fig. 1: Examples of the data as seen by the labeling expert.
 
 ## Overview
 
-There are six brain activity patterns of interest: seizure (SZ), generalized periodic discharges (GPD), lateralized periodic discharges (LPD), lateralized rhythmic delta activity (LRDA), generalized rhythmic delta activity (GRDA), or “other”.
+There are six harmful brain activity patterns of interest: seizure (SZ), generalized periodic discharges (GPD), lateralized periodic discharges (LPD), lateralized rhythmic delta activity (LRDA), generalized rhythmic delta activity (GRDA), or “other”.
 
-The goal is to predict the probability of each of the six classes give 50-second window of EEG data and spectrogram data corresponding to 10 mins centered around the 50-second window.
+The goal is to predict the probability of each of the six classes give 50-second window of EEG data and spectrogram data corresponding to 10 mins centered around the 50-second window. Several experts were asked to  provided a label (vote for a single classification) for the central 10 seconds of the EEG sample, see Fig. 1 for examples. 
 
-One of the challenges is that the number of experts voting on each window varies. 
+One of the challenges of this dataset is that the number of experts voting on each window varies, see Fig. 2. The distribution of the class labels is balanced, see Fig. 3.
 
 <img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/vote_dist.png" width="750">
-Fig: Distribution of the number of expert votes for the training, validation and test sets.
+
+Fig. 2: Distribution of the number of expert votes for the training, validation and test sets.
 
 <img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/class_dist.png" width="750">
-Fig: Distribution of the class labels for the training, validation and test sets.
+
+Fig. 3: Distribution of the class labels for the training, validation and test sets.
 
 
-## Data
+## EEG dataset
 
 The data provided includes the raw EEG data and spectrograms. The EEG data records the electrical activity of the brain. The samples provided record a 50 second window, while the spectrograms cover a 10 minute window. 
 
 The spectrograms are constructed from EEG data using [multitaper spectral estimation](https://en.wikipedia.org/wiki/Multitaper)[1], and represent a visualization of the Fourier spectrum of the EEG signals over time. 
 
-The EEG data is collected using several electrodes and the four spectrograms are constructed from 4 different regions of the scalp as follows: Left lateral (Fp1, F7, T3, T5, O10); Right lateral (Fp2, F8, T4, T6, O2); Left Parasagittal (Fp1, F3, C3, P3, O1); Right Parasagittal (Fp2, F4, C4, P4, O2). 
+The EEG data is collected using several electrodes, see Fig. 4, and the four spectrograms are constructed from 4 different regions of the scalp as follows: Left lateral (Fp1, F7, T3, T5, O10); Right lateral (Fp2, F8, T4, T6, O2); Left Parasagittal (Fp1, F3, C3, P3, O1); Right Parasagittal (Fp2, F4, C4, P4, O2). 
 
 <img src="https://github.com/AmyRouillard/eegClassification/blob/main/files/eegmelb.gif" width="400">
-Fig: EEG electrode placements[2]
 
-### Data format:
+Fig. 4: EEG electrode placements[2]
+
+### Data format
+
+After processing the raw data the following features are available for training. In addition to the training data, a single test sample is supplied for testing code before making a submission to the competition.
 
 #### Target
 
-`class_prob` - ['seizure', 'lpd', 'gpd', 'lrda', 'grda', 'other'] - central 10 seconds
+* `class_prob` - list of length 6, probability of each class, see `labels`
 
-#### Input data
+#### Features
 
-`spec_*` - four arrays of shape (299, 100) - cropped from the raw spectrogram
+* `data_spec_*` - four arrays of shape (299, 100) - cropped from the raw spectrogram
+* `data_eeg_*` - twenty arrays of shape (9800,) - cropped from the raw EEG data
+* `data_eeg_*_spec` - twenty arrays of shape (129, 43) - spectrogram of the the cropped EEG data
 
-`eeg_*` - twenty arrays of shape (9800,) - cropped from the raw EEG data
+#### Metadata
 
-`eeg_*_spec` - twenty arrays of shape (129, 43) - spectrogram of the the cropped EEG data
+* `spec_freq (Hz)` - array of shape (100,) contain the frequency values for the spectrogram
+* `spec_time (s)` - array of shape (299,) contain the time values for the spectrogram
+* `eeg_time (s)` - array of shape (9800,) contain the time values for the EEG data
+* `freq` - tuple of (eeg frequency, spectrogram frequency ) = (0.5 Hz, 200 Hz)
+* `class_label` - string, consensus label for the central 10 seconds given by the class with the most votes. 
+* `class_votes` - list of votes for each class, length 6.
+* `class_probs` - list of probabilities for each class, length 6
+* `labels` - list ['seizure_vote', 'lpd_vote','gpd_vote', 'lrda_vote', 'grda_vote', 'other_vote'].
+
 
 ## Contents
 
@@ -81,10 +96,14 @@ Fig: EEG electrode placements[2]
 ### Week 2:
 - Is there any missing data (NaN etc?)
 - Rescaling? (e.g. min-max scaling, log scaling for spectrogram data)
-- Understand Kullback-Leibler Divergence
-- Apply preprocessing pipeline to all data
+	- log scaling for spectrogram data :heavy_check_mark: 
+	- min-max scaling
+- Understand Kullback-Leibler Divergence :heavy_check_mark: 
+- Apply preprocessing pipeline to all data :heavy_check_mark: 
+- Batch the data 
 - Baseline model (random forest?)
 - Make a first submission to leader board  
+- clean up readme :heavy_check_mark: 
 
 ### Week 3:
 - Transfer learning (resnet50, imagenet, dino)  
