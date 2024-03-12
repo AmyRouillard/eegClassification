@@ -49,7 +49,7 @@ After processing the raw data the following features are available for training.
 * `data_eeg_*` - twenty arrays of shape (9800,) - cropped from the raw EEG data
 * `data_eeg_*_spec` - twenty arrays of shape (129, 43) - spectrogram of the the cropped EEG data
 
-#### Metadata
+#### Metadata (deprecated)
 
 * `spec_freq (Hz)` - array of shape (100,) contain the frequency values for the spectrogram
 * `spec_time (s)` - array of shape (299,) contain the time values for the spectrogram
@@ -63,21 +63,36 @@ After processing the raw data the following features are available for training.
 
 ## Contents
 
-|Folder/File |Description|
-|--|--|
-|**`notebooks/`**|  Python notebooks. |
-|`notebooks/first_look.ipynb`|  First look at the data. Creation of train, validation and test splits. |
-|`notebooks/EDA_votes.ipynb`| Exploratory data analysis of the class distributions.  |
-|`notebooks/Working_with_spectrograms.ipynb`|   |
-|||
-|**`files/`**| Folder containing output files. |
-| `files/*_processed.csv`| Meta data corresponding to the train, validation and test splits created from training data. Some postprocessing is done, vote are converted to probabilities, total votes and file path to parquet files are recorded. |
-|||
-|**`sample_data/`**| Competition data, excluding full training data. |
-| `sample_data/train_eegs` | One EEG from the training data form each class.  |
-|||
-|**`models/`** |Folder containing trained models. |
-
+|Folder | File |Description|
+|--|--|--|
+|**`utils/`**| |Utility files used across the project. |
+|| `utils/CustomDataset` | Custom Pytorch dataset class with example of creating a data loader.  |
+||||
+|**`notebooks/EDA/`**| | Exploratory data analysis and planning for data preprocessing. |
+||`first_look.ipynb`|  First look at the data. Creation of train, validation and test splits. |
+||`EDA_votes.ipynb`| Exploratory data analysis of the class distributions.  |
+||`Working_with_spectrograms.ipynb`| Exploring the spectrogram data.  |
+||`preprocessing.ipynb`| First draft of preprocessing pipeline, streamlined in `notebooks/Data processing/`. Consistency of the data confirmed and frequencies of data collection checked. |
+|**`notebooks/Data processing/`**| |Preprocessing the data. |
+||`data_scaling.ipynb`| Train a standard scaler and a min max scaler using partial fit on batch data.  |
+|**`notebooks/Models/`**| | Notebooks for model training. |
+||`.ipynb`|   |
+||||
+|**`files/`**|| Folder containing output files. |
+|| `*_processed.csv`| Meta data corresponding to the train, validation and test splits created from full training data. |
+||`*.png`,`*.gif`| Images for the readme. |
+||`train_val_test_info_dicts`| Pickled dictionaries to be passed to the dataloader split into train, validation and test sets according to  `*_processed.csv`. |
+||||
+|**`sample_data/`**|| Competition data, excluding full training data. |
+|| `*_eegs/` | Eeg files, a sample of the full dataset. Contains parquet files.  |
+|| `*_spectrograms/` | Spectrogram files, a sample of the full dataset.  Contains parquet files. |
+|| `train.csv` | Metadata for the full training set.  |
+|| `sample_submission.csv` | Sample submission file.   |
+|| `test.csv` | Example metadata for the test set, corresponds to  `sample_submission.csv` |
+||||
+|**`models/`** ||Folder containing trained models. |
+||||
+||||
 
 ## Current tasks
 
@@ -97,19 +112,25 @@ After processing the raw data the following features are available for training.
 - Is there any missing data (NaN etc?)
 - Rescaling? (e.g. min-max scaling, log scaling for spectrogram data)
 	- log scaling for spectrogram data :heavy_check_mark: 
-	- min-max scaling
+	- min-max scaling/standard :heavy_check_mark: 
 - Understand Kullback-Leibler Divergence :heavy_check_mark: 
 - Apply preprocessing pipeline to all data :heavy_check_mark: 
-- Batch the data 
-- Baseline model (random forest?)
-- Make a first submission to leader board  
+- Batch the data  :heavy_check_mark: 
 - clean up readme :heavy_check_mark: 
+- train scalers on 1%-2% of the data (107000 samples) :heavy_check_mark:
+- update markdown in notebooks, documentation 
 
 ### Week 3:
+- compute an estimate of the KL divergence given that 1/6 is predicted for each class. A score worse than this, is worse than guessing.
+- Baseline model (random forest?)
+- Make a first submission to leader board  
 - Transfer learning (resnet50, imagenet, dino)  
 	- Data preparation
 	- Augmentation
 	- Learning scheduler
+
+### Week 4:
+
 - Explainablitiy
 
 ## Refereces
