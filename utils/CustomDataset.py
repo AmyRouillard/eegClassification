@@ -23,23 +23,32 @@ class CustomDataset(Dataset):
 
         data = self.preprocessing(path, offset)
         class_votes = self.data_info_dict[(data_id, item_id, offset)]["votes"]
-        if class_votes is not None:
-            class_probs = class_votes / np.sum(class_votes)
-            label = np.argmax(class_votes)
-        else:
-            class_probs = np.array([])
+        if class_votes is None:
+            class_votes = np.array([])
             label = np.array([])
+        else:
+            label = np.argmax(class_votes)
+        # if class_votes is not None:
+        #     class_probs = class_votes / np.sum(class_votes)
+        #     label = np.argmax(class_votes)
+        # else:
+        #     class_probs = np.array([])
+        #     label = np.array([])
 
         if self.transform:
             for trans in self.transform:
+                # print(data.shape, data.reshape(-1, 1).shape)
                 data = trans(data)
 
-        return data, label, class_probs
+        return data, label, class_votes
 
     def preprocessing(self, path, offset):
         freq = 200 if "eeg" in self.data_type else 0.5  # Hz
 
         data = pq.read_table(path).to_pandas()
+
+        # fill nan with zeros
+        data = data.fillna(0)
 
         collected_data = []
         if self.data_type == "spec":
@@ -75,6 +84,9 @@ class CustomDataset(Dataset):
             raise ValueError(
                 "Invalid data type provided. Must be one of ['spec', 'eeg_raw', 'eeg_spec']"
             )
+
+        # move last axis to first
+        data = np.moveaxis(data, -1, 0)
 
         return data
 
