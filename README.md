@@ -133,7 +133,15 @@ After processing the raw data the following features are available for training.
 
 - Explainablitiy
 
+### Resources:
+
+https://www.kaggle.com/code/awsaf49/hms-hbac-kerascv-starter-notebook
+https://www.tensorflow.org/api_docs/python/tf/tile
+https://pytorch.org/vision/main/models/generated/torchvision.models.efficientnet_b2.html
+https://keras.io/api/keras_cv/models/backbones/efficientnetv2/
+
 ## Refereces
 
 [1] Zafar, S.F., Amorim, E., Williamsom, C.A., Jing, J., Gilmore, E.J., Haider, H.A., Swisher, C., Struck, A., Rosenthal, E.S., Ng, M. and Schmitt, S., 2020. A standardized nomenclature for spectrogram EEG patterns: inter-rater agreement and correspondence with common intensive care unit EEG patterns. Clinical Neurophysiology, 131(9), pp.2298-2306.
 [2] https://paulbourke.net/dataformats/eeg/
+
