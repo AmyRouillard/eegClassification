@@ -11,7 +11,7 @@ to_tensor = lambda batch_size, x, y, z: (
 
 # crop my differ for different architectures
 crop_reshape_transform = lambda batch_size, x, y, z: (
-    x[:, :, 21 : 299 - 22, 0 : 256 // 4].reshape(batch_size, 256, 256).transpose(2, 1),
+    x[:, :, 5 : 299 - 6, 0 : 288 // 4].reshape(batch_size, 288, 288).transpose(2, 1),
     y,
     z,
 )
@@ -22,7 +22,7 @@ scale_transform = lambda batch_size, x, y, z: (  # scale to 0-1
         - torch.min(x.reshape(batch_size, -1), dim=1).values.unsqueeze(1),
         torch.max(x.reshape(batch_size, -1), dim=1).values.unsqueeze(1)
         - torch.min(x.reshape(batch_size, -1), dim=1).values.unsqueeze(1),
-    ).reshape(batch_size, 256, 256),
+    ).reshape(batch_size, 288, 288),
     y,
     z,
 )
