@@ -4,15 +4,16 @@ import torch
 from torchvision.transforms import Normalize
 
 
-class CustomDataset(Dataset):
+class CustomDatasetNPY(Dataset):
     def __init__(
         self,
         data_path,
-        N_items,
+        data_files,
         transform=None,
     ):
         self.data_path = data_path
-        self.N_items = N_items
+        self.data_files = data_files
+        self.N_items = len(self.data_files)
         self.transform = transform
 
     def __len__(self):
@@ -20,14 +21,14 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
 
+        idx = self.data_files[idx]
         # read data from path, npy
         data = np.load(self.data_path + "images_" + str(idx) + ".npy")
         # label = np.load(self.data_path + "labels_" + str(idx) + ".npy")
         class_votes = np.load(self.data_path + "votes_" + str(idx) + ".npy")
 
-        batch_size = data.shape[0]
-
         if self.transform:
+            batch_size = data.shape[0]
             for trans in self.transform:
                 # print(data.shape, data.reshape(-1, 1).shape)
                 data = trans(batch_size, data)
@@ -59,7 +60,7 @@ class CustomDataset(Dataset):
 
 # # # %%
 
-# dataset = CustomDataset(data_path, N_items)
+# dataset = CustomDatasetNPY(data_path, N_items)
 # # already batched into batches of 64
 # train_dataloader = DataLoader(dataset, batch_size=1, shuffle=False)
 

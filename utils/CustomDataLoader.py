@@ -9,6 +9,10 @@ def transpose_stack(x):
     return x.transpose(0, 1).reshape(299, 400).transpose(0, 1)
 
 
+def transpose_stack_eeg_spec(x):
+    return x.transpose(0, 1).reshape(129, 7 * 20).transpose(0, 1)
+
+
 def normalize(x):
     # Calculate mean and standard deviation once
     mean = torch.mean(x)
@@ -30,28 +34,20 @@ def normalize_special(x):
     return (x * std - mean).reshape(3, 400, 299)
 
 
-# def transpose_stack(x):
-#     return x.transpose(0, 1).reshape(299, 400).transpose(0, 1)
+def normalize_special_eeg_spec(x):
+    # Use broadcasting to avoid unnecessary reshape operations
+    mean = torch.tensor([0.485, 0.456, 0.406]).unsqueeze(1).unsqueeze(2)
+    std = torch.tensor([0.229, 0.224, 0.225]).unsqueeze(1).unsqueeze(2)
+    return (x * std - mean).reshape(3, 7 * 20, 129)
 
 
-# def normalize(x):
-#     return torch.div(
-#         x.reshape(1, -1) - torch.mean(x.reshape(1, -1), axis=-1).unsqueeze(1),
-#         torch.std(x.reshape(1, -1), axis=-1).unsqueeze(1),
-#     ).reshape(400, 299)
+def min_max_scaling(x):
+    # Calculate min and max once
+    min_val = torch.min(x, dim=1).values.unsqueeze(1)
+    max_val = torch.max(x, dim=1).values.unsqueeze(1)
 
-
-# def tile(x):
-#     return torch.tile(x, (3, 1, 1))
-
-
-# def normalize_special(x):
-#     return (
-#         torch.multiply(
-#             x.reshape(3, -1), torch.tensor([0.229, 0.224, 0.225]).unsqueeze(1)
-#         )
-#         - torch.tensor([0.485, 0.456, 0.406]).unsqueeze(1)
-#     ).reshape(3, 400, 299)
+    # Normalize using calculated min and max
+    return torch.div(x - min_val, max_val - min_val)
 
 
 class CustomDataset(Dataset):
@@ -96,6 +92,14 @@ class CustomDataset(Dataset):
                 tile,
                 normalize_special,
             )
+        elif transform is None and self.data_type == "eeg_spec":
+            self.transform = (
+                torch.tensor,
+                transpose_stack_eeg_spec,
+                normalize,
+                tile,
+                normalize_special_eeg_spec,
+            )
         else:
             self.transform = transform
 
@@ -124,7 +128,7 @@ class CustomDataset(Dataset):
             for trans in self.transform:
                 data = trans(data)
 
-        return data, label, class_votes
+        return data, class_votes
 
     def preprocessing(self, path, offset):
         freq = 200 if "eeg" in self.data_type else 0.5  # Hz
@@ -154,13 +158,29 @@ class CustomDataset(Dataset):
             # clip values between exp(-4) and exp(8)
             data = np.clip(data[start:end, :], np.exp(-4), np.exp(8))
             data = np.log(data)
+            # move last axis to first
+            data = np.moveaxis(data, -1, 0)
         elif self.data_type == "eeg_raw":
-            start = int((0 + offset) * freq)
-            end = int((49 + offset) * freq)
+
+            # select the central 50 seconds of the data
+            # start = int((0 + offset) * freq)
+            # end = int((49 + offset) * freq)
+            # select the central 10 seconds of the data
+            start = int((20 + offset) * freq)
+            end = int((29 + offset) * freq)
+
             data = data[start:end]
+            # move last axis to first
+            data = np.moveaxis(data, -1, 0)
         elif self.data_type == "eeg_spec":
-            start = int((0 + offset) * freq)
-            end = int((49 + offset) * freq)
+
+            # select the central 50 seconds of the data
+            # start = int((0 + offset) * freq)
+            # end = int((49 + offset) * freq)
+            # select the central 10 seconds of the data
+            start = int((20 + offset) * freq)
+            end = int((29 + offset) * freq)
+
             data = data[start:end]
             # apply spectrogram to across all channels, axis 0
             spec_data = []
@@ -171,13 +191,11 @@ class CustomDataset(Dataset):
                 spec_data.append(np.log(Sxx))
 
             data = np.moveaxis(np.array(spec_data), 0, -1)
+            data = np.array(spec_data)
         else:
             raise ValueError(
                 "Invalid data type provided. Must be one of ['spec', 'eeg_raw', 'eeg_spec']"
             )
-
-        # move last axis to first
-        data = np.moveaxis(data, -1, 0)
 
         return data
 
@@ -190,7 +208,7 @@ class CustomDataset(Dataset):
 
 # # Load (train or test) data from csv file
 # path = "C:/Users/Amy/Desktop/Green_Git/eegClassification/"
-# data_type = "spec"  # "eeg_raw""eeg_spec"  #
+# data_type = "eeg_raw"  # "spec"  #"eeg_spec"
 # train = True
 # text = "train" if train else "test"
 
