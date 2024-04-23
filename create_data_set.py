@@ -267,13 +267,16 @@ def run(
             count += 1
             # calculate the batch loss
             loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+            test_loss += loss.item()  # *data.size(0)
+
             # dummy is a tensor filled with 1/6 of shape [64,6]
             dummy = torch.ones(data.size(0), N_classes).to(device)
             dummy = dummy / N_classes
-            loss_baseline = criterion(output.float(), F.log_softmax(dummy, dim=1))
-            # update test loss
-            test_loss += loss.item()  # *data.size(0)
-            test_loss_baseline += loss_baseline.item()  # *data.size(0)
+            loss_baseline = criterion(
+                F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
+            )
+            test_loss_baseline += loss_baseline.item()
+
             # convert output probabilities to predicted class
             _, pred = torch.max(output, 1)
             # compare predictions to true label
@@ -442,7 +445,7 @@ for mv in min_votes:
 
             count = 0
             for X, votes in tqdm(data_loader, desc=f"Saving {text} data"):
-                print(X.shape, votes.shape)
+
                 if test and count >= 3:
                     break
 
