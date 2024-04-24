@@ -89,18 +89,19 @@ else:
 
 ######
 
-# filter data, eg number of votes >5
-min_votes = [0, 5]
-# augment data (window shifting)
-augmentation = [False, True]
-# label smoothing
-label_smoothing = [0, 0.01]
-# number of epochs to train the model
-n_epochs = 40 if not test else 1
-# data type
-data_type = "eeg_spec"  # "eeg_raw" #"spec" #
-# model name
-model_name = "CustomCNN_eeg"
+# # filter data, eg number of votes >5
+# min_votes = [0, 5]
+# # augment data (window shifting)
+# augmentation = [False, True]
+# # label smoothing
+# label_smoothing = [0, 0.01]
+# # number of epochs to train the model
+# n_epochs = 40 if not test else 1
+# # data type
+# data_type = "eeg_spec"  # "eeg_raw" #"spec" #
+# # model name
+# model_name = "CustomCNN_eeg"
+# input_shape = (3, 140, 129)
 
 # # filter data for #votes >5
 # min_votes = [0, 5]
@@ -112,6 +113,25 @@ model_name = "CustomCNN_eeg"
 # n_epochs = 20 if not test else 1
 # # data type
 # data_type = "spec"  # "eeg_spec"  # "eeg_raw" #
+# model_name = "CustomCNN"
+# input_shape = (3, 400, 299)
+
+# filter data, eg number of votes >5
+min_votes = [0, 5]
+# augment data (window shifting)
+augmentation = [False, True]
+# label smoothing
+label_smoothing = [0, 0.01]
+# number of epochs to train the model
+n_epochs = 40 if not test else 1
+# data type
+data_type = "eeg_spec"  # "eeg_raw" #"spec" #
+# model name
+model_name = "CustomCNN_eeg_small"
+
+input_shape = (1, 140, 129)
+# select one of the 3 channels
+transform = (lambda batch_size, x: x[:, 0, :, :].reshape(batch_size, *input_shape),)
 
 
 first = True
@@ -123,14 +143,20 @@ for mv in min_votes:
         )
 
         if first:
-            save_data([train_loader, valid_loader, test_loader], save_path, test)
+            # save_data(
+            #     [train_loader, valid_loader, test_loader],
+            #     ["train", "valid", "test"],
+            #     save_path,
+            #     test,
+            # )
             first = False
         else:
-            save_data([train_loader, valid_loader], save_path, test)
+            save_data([train_loader, valid_loader], ["train", "valid"], save_path, test)
 
         train_data = CustomDatasetNPY(
             save_path + "train/",
             [str(i) for i in range(len(train_loader))],
+            transform=transform,
         )
         train_loader = DataLoader(
             train_data, batch_size=1, shuffle=False, num_workers=num_workers
@@ -139,6 +165,7 @@ for mv in min_votes:
         valid_data = CustomDatasetNPY(
             save_path + "valid/",
             [str(i) for i in range(len(valid_loader))],
+            transform=transform,
         )
         valid_loader = DataLoader(
             valid_data, batch_size=1, shuffle=False, num_workers=num_workers
@@ -147,6 +174,7 @@ for mv in min_votes:
         test_data = CustomDatasetNPY(
             save_path + "test/",
             [str(i) for i in range(len(test_loader))],
+            transform=transform,
         )
         test_loader = DataLoader(
             test_data, batch_size=1, shuffle=False, num_workers=num_workers
@@ -164,7 +192,7 @@ for mv in min_votes:
                 path_out,
                 model_name,
                 ls,
-                data_type,
+                input_shape,
                 n_epochs,
                 model_info,
                 train_loader,

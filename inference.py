@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import pandas as pd
 import json
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -40,7 +41,7 @@ num_workers = 0  # cpu.cpu_count()  # - 1 #
 # how many samples per batch to load
 batch_size = 64  # 8  #
 # Is a test?
-test = True
+test = False
 
 # specify the image classes
 classes = [
@@ -70,67 +71,74 @@ if os.path.exists(path_out + "split.json"):
 else:
     raise ValueError("No train/test split found")
 
+path_df = "C:\\Users\\Amy\\Desktop\\Green_Git\\eegClassification\\sample_data\\"
+df = pd.read_csv(path_df + f"train.csv")
+N_samples = len(df[df["patient_id"].isin(test_p)])
+N_samples = np.ceil(N_samples / batch_size).astype(int)
 
 ######
 
 # data type
-data_type = "eeg_spec"  # "eeg_raw" #"spec" #
+data_type = "spec"  # "eeg_spec"  # "eeg_raw" #
 # model name
-model_name = "CustomCNN_eeg"
+model_name = "CustomCNN"  # _eeg
 index = 0
 
 ######
-# for index in range(8):
-test_data = CustomDatasetNPY(
-    save_path + "test/",
-    [str(i) for i in range(len(test_p))],
-)
-test_loader = DataLoader(
-    test_data, batch_size=1, shuffle=False, num_workers=num_workers
-)
-if data_type == "spec":
-    input_shape = (3, 400, 299)
-elif data_type == "eeg_spec":
-    input_shape = (3, 140, 129)  # (20,129,43)
-elif data_type == "eeg_raw":
-    input_shape = (20, 9800)
+for index in range(4):
+    test_data = CustomDatasetNPY(
+        save_path + f"test_{data_type}/",
+        [str(i) for i in range(N_samples)],
+    )
+    test_loader = DataLoader(
+        test_data, batch_size=1, shuffle=False, num_workers=num_workers
+    )
+    if data_type == "spec":
+        input_shape = (3, 400, 299)
+    elif data_type == "eeg_spec":
+        input_shape = (3, 140, 129)  # (20,129,43)
+    elif data_type == "eeg_raw":
+        input_shape = (20, 9800)
 
-path_model = path_out + f"model_{model_name}_{index}.pt"
+    path_model = path_out + f"model_{model_name}_{index}.pt"
 
-test_loss, test_loss_baseline, cm, cm_p, predictions, labels = run_inference(
-    model_name, path_model, test_loader, input_shape, is_test=test
-)
+    accuracy, test_loss, test_loss_baseline, cm, cm_p, predictions, labels = (
+        run_inference(model_name, path_model, test_loader, input_shape, is_test=test)
+    )
 
-#####
+    #####
 
-# save results
+    # save results
 
-loss_dict = {"test_loss": test_loss, "test_loss_baseline": test_loss_baseline}
-# save loss_dict to json
-with open(path_out + f"loss_{model_name}_{index}.json", "w") as f:
-    json.dump(loss_dict, f)
+    loss_dict = {
+        "test_loss": test_loss,
+        "test_loss_baseline": test_loss_baseline,
+        "accuracy": accuracy,
+    }
+    # save loss_dict to json
+    with open(path_out + f"eval_{model_name}_{index}.json", "w") as f:
+        json.dump(loss_dict, f)
 
-# save predictions and labels as npy
-np.save(path_out + f"predictions_{model_name}_{index}.npy", predictions)
-np.save(path_out + f"labels_{model_name}_{index}.npy", labels)
+    # save predictions and labels as npy
+    np.save(path_out + f"predictions_{model_name}_{index}.npy", predictions)
+    np.save(path_out + f"labels_{model_name}_{index}.npy", labels)
 
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+    plt.xticks(ticks=np.arange(6) + 0.5, labels=classes)
+    plt.yticks(ticks=np.arange(6) + 0.5, labels=classes)
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
 
-plt.figure(figsize=(10, 10))
-sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-plt.xticks(ticks=np.arange(6) + 0.5, labels=classes)
-plt.yticks(ticks=np.arange(6) + 0.5, labels=classes)
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.title("Confusion Matrix")
+    plt.savefig(path_out + f"cm_{model_name}_{index}.png")
 
-plt.savefig(path_out + f"cm_{model_name}_{index}.png")
+    plt.figure(figsize=(10, 10))
+    sns.heatmap(cm_p * 100, annot=True, fmt=".1f", cmap="Blues")
+    plt.xticks(ticks=np.arange(6) + 0.5, labels=classes)
+    plt.yticks(ticks=np.arange(6) + 0.5, labels=classes)
+    plt.xlabel("Predicted")
+    plt.ylabel("Actual")
+    plt.title("Confusion Matrix")
 
-plt.figure(figsize=(10, 10))
-sns.heatmap(cm_p, annot=True, fmt="d", cmap="Blues")
-plt.xticks(ticks=np.arange(6) + 0.5, labels=classes)
-plt.yticks(ticks=np.arange(6) + 0.5, labels=classes)
-plt.xlabel("Predicted")
-plt.ylabel("Actual")
-plt.title("Confusion Matrix")
-
-plt.savefig(path_out + f"cm_probs_{model_name}_{index}.png")
+    plt.savefig(path_out + f"cm_probs_{model_name}_{index}.png")

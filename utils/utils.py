@@ -157,7 +157,8 @@ def train_func(
     test=False,
     valid_loss_min=np.Inf,
 ):
-    criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    # criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters())
 
     track_loss = []
@@ -203,7 +204,8 @@ def train_func(
             else:
 
                 # loss
-                loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+                # loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+                loss = criterion(torch.exp(output), torch.argmax(votes, axis=1))
 
                 # update training loss
                 train_loss += loss.item()  # *data.size(0)
@@ -238,7 +240,9 @@ def train_func(
                 print("Nan in output")
             else:
                 # calculate the batch loss
-                loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+                # loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+                loss = criterion(torch.exp(output), torch.argmax(votes, axis=1))
+
                 # update average validation loss
                 valid_loss += loss.item()  # *data.size(0)
 
@@ -332,7 +336,7 @@ def run(
     path_out,
     model_name,
     label_smoothing,
-    data_type,
+    input_shape,
     n_epochs,
     model_info,
     train_loader,
@@ -343,13 +347,6 @@ def run(
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     train_on_gpu = torch.cuda.is_available()
-
-    if data_type == "spec":
-        input_shape = (3, 400, 299)
-    elif data_type == "eeg_spec":
-        input_shape = (3, 140, 129)  # (20,129,43)
-    elif data_type == "eeg_raw":
-        input_shape = (20, 9800)
 
     # get model name as executable function
     model = getattr(module, model_name)(input_shape=input_shape, N_classes=N_classes)
@@ -413,7 +410,8 @@ def run(
 
     model.load_state_dict(torch.load(configs["path_model_out"]))
 
-    criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    # criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    criterion = nn.CrossEntropyLoss()
 
     # track test loss
     test_loss = 0.0
@@ -443,15 +441,18 @@ def run(
         else:
             count += 1
             # calculate the batch loss
-            loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+            # loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+            loss = criterion(torch.exp(output), torch.argmax(votes, axis=1))
+
             test_loss += loss.item()  # *data.size(0)
 
             # dummy is a tensor filled with 1/6 of shape [64,6]
             dummy = torch.ones(data.size(0), N_classes).to(device)
             dummy = dummy / N_classes
-            loss_baseline = criterion(
-                F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
-            )
+            # loss_baseline = criterion(
+            #     F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
+            # )
+            loss_baseline = criterion(dummy, torch.argmax(votes, axis=1))
             test_loss_baseline += loss_baseline.item()
 
             # convert output probabilities to predicted class
@@ -491,10 +492,10 @@ def run(
     model_info["confusion_matrix_p"] = cm_p.tolist()
 
 
-def save_data(loaders, save_path, test=False):
+def save_data(loaders, names, save_path, test=False):
     for data_loader, text in zip(
         loaders,
-        ["train", "valid", "test"],
+        names,
     ):
         tmp_path = save_path + f"{text}/"
         if not os.path.exists(tmp_path):
@@ -520,9 +521,12 @@ def run_inference(model_name, path_model_out, test_loader, input_shape, is_test=
 
     # get model name as executable function
     model = getattr(module, model_name)(input_shape=input_shape, N_classes=N_classes)
+
+    # load trained model
     model.load_state_dict(torch.load(path_model_out))
 
-    criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    # criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    criterion = nn.CrossEntropyLoss()
 
     # track test loss
     test_loss = 0.0
@@ -554,15 +558,19 @@ def run_inference(model_name, path_model_out, test_loader, input_shape, is_test=
         else:
             count += 1
             # calculate the batch loss
-            loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+            # loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+            loss = criterion(torch.exp(output), torch.argmax(votes, axis=1))
+
             test_loss += loss.item()  # *data.size(0)
 
             # dummy is a tensor filled with 1/6 of shape [64,6]
             dummy = torch.ones(data.size(0), N_classes).to(device)
             dummy = dummy / N_classes
-            loss_baseline = criterion(
-                F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
-            )
+            # loss_baseline = criterion(
+            #     F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
+            # )
+            loss_baseline = criterion(dummy, torch.argmax(votes, axis=1))
+
             test_loss_baseline += loss_baseline.item()
 
             # convert output probabilities to predicted class
@@ -590,6 +598,9 @@ def run_inference(model_name, path_model_out, test_loader, input_shape, is_test=
     predictions = np.concatenate(predictions, axis=0)
     labels = np.concatenate(labels, axis=0)
 
+    accuracy = 100 * np.sum(class_correct) / np.sum(class_total)
+    print("Test Accuracy: {:.6f}%\n".format(accuracy))
+
     # average test loss
     test_loss = test_loss / count  # len(test_loader.dataset)  # /batch_size
     print("Test Loss: {:.6f}\n".format(test_loss))
@@ -602,4 +613,4 @@ def run_inference(model_name, path_model_out, test_loader, input_shape, is_test=
     cm = confusion_matrix(cm_y_true, cm_y_pred)
     cm_p = cm.astype("float") / cm.sum(axis=1)[:, np.newaxis]
 
-    return test_loss, test_loss_baseline, cm, cm_p, predictions, labels
+    return accuracy, test_loss, test_loss_baseline, cm, cm_p, predictions, labels
