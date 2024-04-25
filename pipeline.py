@@ -40,7 +40,7 @@ num_workers = 0  # cpu.cpu_count()  # - 1 #
 # how many samples per batch to load
 batch_size = 64  # 8  #
 # Is a test?
-test = False
+test = False  # True  #
 
 # specify the image classes
 classes = [
@@ -102,6 +102,7 @@ else:
 # # model name
 # model_name = "CustomCNN_eeg"
 # input_shape = (3, 140, 129)
+# transform = tuple()
 
 # # filter data for #votes >5
 # min_votes = [0, 5]
@@ -116,6 +117,23 @@ else:
 # model_name = "CustomCNN"
 # input_shape = (3, 400, 299)
 
+# # filter data, eg number of votes >5
+# min_votes = [0, 5]
+# # augment data (window shifting)
+# augmentation = [False, True]
+# # label smoothing
+# label_smoothing = [0, 0.01]
+# # number of epochs to train the model
+# n_epochs = 10 if not test else 1
+# # data type
+# data_type = "eeg_spec"  # "eeg_raw" #"spec" #
+# # model name
+# model_name = "CustomCNN_eeg_small"
+# input_shape = (1, 140, 129)
+# # select one of the 3 channels
+# transform = (lambda batch_size, x: x[:, 0, :, :].reshape(batch_size, *input_shape),)
+
+
 # filter data, eg number of votes >5
 min_votes = [0, 5]
 # augment data (window shifting)
@@ -123,15 +141,13 @@ augmentation = [False, True]
 # label smoothing
 label_smoothing = [0, 0.01]
 # number of epochs to train the model
-n_epochs = 40 if not test else 1
+n_epochs = 8 if not test else 1
 # data type
 data_type = "eeg_spec"  # "eeg_raw" #"spec" #
 # model name
-model_name = "CustomCNN_eeg_small"
-
-input_shape = (1, 140, 129)
-# select one of the 3 channels
-transform = (lambda batch_size, x: x[:, 0, :, :].reshape(batch_size, *input_shape),)
+model_name = "TransNet_Resnet18_unfrozen"
+input_shape = (3, 140, 129)
+transform = tuple()
 
 
 first = True

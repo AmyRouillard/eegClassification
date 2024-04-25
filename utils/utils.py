@@ -297,6 +297,10 @@ def create_data_loaders(
         dataset_test, batch_size=batch_size, shuffle=False, num_workers=num_workers
     )
 
+    # split train_p into train and validation
+    split = int(0.8 * len(train_p))
+    train_p, valid_p = train_p[:split], train_p[split:]
+
     df_train = df[df["patient_id"].isin(train_p)]
     df_train = df_train[df_train["total_votes"] >= min_votes]
     info_train = get_data_info(df_train, data_type)
@@ -307,26 +311,33 @@ def create_data_loaders(
     else:
         info_train_aug = info_train.copy()
 
-    print("Creating data loaders...")
-    dataset = CustomDataset(data_dir, data_type, info_train_aug)
-    # split the dataset into training and validation
-    valid_size = 0.2
-    num_train = len(dataset)
-    indices = list(range(num_train))
-    np.random.shuffle(indices)
-    split = int(np.floor(valid_size * num_train))
-    train_idx, valid_idx = indices[split:], indices[:split]
+    df_valid = df[df["patient_id"].isin(valid_p)]
+    # df_valid = df_valid[df_valid["total_votes"] >= min_votes]
+    info_valid = get_data_info(df_valid, data_type)
+    info_valid = shuffle(info_valid)
+    info_valid_aug = info_valid.copy()
 
-    # define samplers for obtaining training and validation batches
-    train_sampler = SubsetRandomSampler(train_idx)
-    valid_sampler = SubsetRandomSampler(valid_idx)
+    print("Creating data loaders...")
+    train_dataset = CustomDataset(data_dir, data_type, info_train_aug)
+    valid_dataset = CustomDataset(data_dir, data_type, info_valid_aug)
+    # # split the dataset into training and validation
+    # valid_size = 0.2
+    # num_train = len(dataset)
+    # indices = list(range(num_train))
+    # np.random.shuffle(indices)
+    # split = int(np.floor(valid_size * num_train))
+    # train_idx, valid_idx = indices[split:], indices[:split]
+
+    # # define samplers for obtaining training and validation batches
+    # train_sampler = SubsetRandomSampler(train_idx)
+    # valid_sampler = SubsetRandomSampler(valid_idx)
 
     # prepare data loaders (combine dataset and sampler)
     train_loader = DataLoader(
-        dataset, batch_size=batch_size, sampler=train_sampler, num_workers=num_workers
+        train_dataset, batch_size=batch_size, num_workers=num_workers
     )
     valid_loader = DataLoader(
-        dataset, batch_size=batch_size, sampler=valid_sampler, num_workers=num_workers
+        valid_dataset, batch_size=batch_size, num_workers=num_workers
     )
 
     return train_loader, valid_loader, test_loader
@@ -525,8 +536,8 @@ def run_inference(model_name, path_model_out, test_loader, input_shape, is_test=
     # load trained model
     model.load_state_dict(torch.load(path_model_out))
 
-    # criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.KLDivLoss(reduction="batchmean", log_target=True)
+    # criterion = nn.CrossEntropyLoss()
 
     # track test loss
     test_loss = 0.0
@@ -558,18 +569,18 @@ def run_inference(model_name, path_model_out, test_loader, input_shape, is_test=
         else:
             count += 1
             # calculate the batch loss
-            # loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
-            loss = criterion(torch.exp(output), torch.argmax(votes, axis=1))
+            loss = criterion(output.float(), F.log_softmax(votes.float(), dim=1))
+            # loss = criterion(torch.exp(output), torch.argmax(votes, axis=1))
 
             test_loss += loss.item()  # *data.size(0)
 
             # dummy is a tensor filled with 1/6 of shape [64,6]
             dummy = torch.ones(data.size(0), N_classes).to(device)
             dummy = dummy / N_classes
-            # loss_baseline = criterion(
-            #     F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
-            # )
-            loss_baseline = criterion(dummy, torch.argmax(votes, axis=1))
+            loss_baseline = criterion(
+                F.log_softmax(dummy, dim=1), F.log_softmax(votes.float(), dim=1)
+            )
+            # loss_baseline = criterion(dummy, torch.argmax(votes, axis=1))
 
             test_loss_baseline += loss_baseline.item()
 

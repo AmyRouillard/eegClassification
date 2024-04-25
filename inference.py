@@ -78,14 +78,21 @@ N_samples = np.ceil(N_samples / batch_size).astype(int)
 
 ######
 
+# # data type
+# data_type = "spec"
+# # model name
+# model_name = "CustomCNN"
+# index = 0
+
 # data type
-data_type = "spec"  # "eeg_spec"  # "eeg_raw" #
+data_type = "eeg_raw"
 # model name
-model_name = "CustomCNN"  # _eeg
-index = 0
+model_name = "CustomCNN_eeg"
+# index = 0
 
 ######
-for index in range(4):
+# for index in range(4):
+for index in range(1):
     test_data = CustomDatasetNPY(
         save_path + f"test_{data_type}/",
         [str(i) for i in range(N_samples)],
@@ -111,8 +118,8 @@ for index in range(4):
     # save results
 
     loss_dict = {
-        "test_loss": test_loss,
-        "test_loss_baseline": test_loss_baseline,
+        "test_loss_kl": test_loss,
+        "test_loss_baseline_kl": test_loss_baseline,
         "accuracy": accuracy,
     }
     # save loss_dict to json

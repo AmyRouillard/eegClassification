@@ -28,7 +28,7 @@ Fig. 3: Distribution of the class labels for the training, validation and test s
 
 ## EEG dataset
 
-The EEG data records the electrical activity of the brain at serval points on the scalp. Signals are collected using several electrodes, see Fig. 4, and the four spectrograms are constructed from 4 different regions of the scalp as follows: Left lateral (Fp1, F7, T3, T5, O10); Right lateral (Fp2, F8, T4, T6, O2); Left Parasagittal (Fp1, F3, C3, P3, O1); Right Parasagittal (Fp2, F4, C4, P4, O2). 
+The EEG data records the electrical activity of the brain at serval points on the scalp. Signals are collected using several electrodes, see Fig. 4, and the four spectrograms are constructed from 4 different regions of the scalp as follows: Left lateral (Fp1, F7, T3, T5, O1); Right lateral (Fp2, F8, T4, T6, O2); Left Parasagittal (Fp1, F3, C3, P3, O1); Right Parasagittal (Fp2, F4, C4, P4, O2). 
 
 The spectrograms are constructed from EEG data using [multitaper spectral estimation](https://en.wikipedia.org/wiki/Multitaper)[1], and represent a visualization of the Fourier spectrum of the EEG signals over time. 
 
