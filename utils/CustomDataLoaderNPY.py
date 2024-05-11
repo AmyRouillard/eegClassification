@@ -1,7 +1,5 @@
 from torch.utils.data import Dataset
 import numpy as np
-import torch
-from torchvision.transforms import Normalize
 
 
 class CustomDatasetNPY(Dataset):
@@ -38,6 +36,8 @@ class CustomDatasetNPY(Dataset):
 
 # # %%
 
+# import torch
+# from torchvision.transforms import Normalize
 # from torch.utils.data import DataLoader
 # from torchvision.transforms import ToPILImage
 # import os
