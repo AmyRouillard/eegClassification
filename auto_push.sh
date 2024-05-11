@@ -11,7 +11,7 @@ git_push() {
 git_push
 
 # Loop for 7.5 hours (15 iterations with a 30-minute interval)
-for ((i = 1; i <= 15; i++)); do
+for ((i = 1; i <= 30; i++)); do
     sleep 1800  # Sleep for 30 minutes (1800 seconds)
     git_push
 done
